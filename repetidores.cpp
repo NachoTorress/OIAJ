@@ -1,110 +1,50 @@
-#include <bits/stdc++.h>
-#define ll long long
-#define INF 1e18
-using namespace std;
-vector <ll> colores;
-vector <vector <ll>> ady;
-vector <bool> visited;
-vector <bool> esRaiz;
+#include <bits/stdc++.h> 
+using namespace std; 
+#define ll long long 
+vector <vector <ll>> ady; 
+vector <ll> color; 
+vector <bool> esHijo; 
 ll costo;
-void  dfs (vector <ll> colores2,bool color, ll nodo){
-	if (visited[nodo])	 return;
-
-	visited[nodo]=true;
-	if (colores2[color]!=colores[nodo]) costo++;
-	colores[nodo]=colores2[color];
-	for (auto i:ady[nodo]){
-		dfs(colores2, !color, i);
-	}
-	
+void dfs (ll nodo, vector <ll> &colores, bool indice){
+	if (color[nodo]!=colores[indice]) costo++;
+	for (auto i:ady[nodo]) dfs(i, colores, !indice);
 }
 int main(){
-	freopen("repetidores.in", "r", stdin);
-	freopen("repetidores.out", "w", stdout);
-	ll n; cin>>n;
+	ll n; cin>>n; 
 	if (n==0){
-		int mini=0;
-		char l1='A', l2='B';
-		cout<<mini<<" "<<l1<<" "<<l2<<"\n";
+    	cout << "0 A B" << endl; 
 		return 0;
 	}
-	colores.resize(n);
-	ady.resize(n);
-	esRaiz.resize(n, true);
-	visited.resize(n, 0);
-	for (ll i=0;i<n;i++){
-		ll numero, dependientes;
-		char color;
-		cin>>numero>>color>>dependientes;
-		numero--;
-		colores[numero]=color-'A';
-		for (ll j=0;j<dependientes;j++){
-			ll hijo; cin>>hijo; hijo--;
-			ady[numero].push_back(hijo);
+	else if (n==1){
+		ll id, hijos; char letra;
+		cin>>id>>letra>>hijos; 
+		ll numLetra=letra-'A'; 
+		ll numC2=(numLetra+1)%3; 
+		char c2=numC2+'A'; 
+		cout<<0<<" "<<letra<<" "<<c2<<endl; 
+		return 0;
+	}
+	ady.resize(n+1), color.resize(n+1), esHijo.resize(n+1,false);
+	for (int i=0;i<n;i++){
+		ll id, hijos; char letra; cin>>id>>letra>>hijos; 
+		color[id]=letra-'A';  
+		for (int j=0;j<hijos;j++){
+			ll idJ; cin>>idJ; 
+			esHijo[idJ]=true;
+			ady[id].push_back(idJ);
 		}
 	}
-	for (int i=0;i<ady.size();i++){
-		for (int j=0;j<ady[i].size();j++) esRaiz[ady[i][j]]=false;
+	ll raiz; 
+	for (int i=1;i<=n;i++) if (!esHijo[i]){raiz=i;break;}
+	vector <vector<ll>> ops; 
+	ops.push_back({0,1}); ops.push_back({1,0}); ops.push_back({0,2}); ops.push_back({2,0}); ops.push_back({1,2}); ops.push_back({2,1});
+	ll minCosto=LLONG_MAX;
+	vector <ll> resp; 
+	for (auto i:ops){
+		costo=0; 
+		dfs(raiz,i,0); 
+		if (costo<minCosto) resp=i, minCosto=costo;	
 	}
-	ll raiz;
-	for (int i=0;i<n;i++) {
-		if (esRaiz[i]){
-			raiz=i;
-			break;
-		}
-	}
-	vector <ll>coloresAux=colores;
-	vector <bool> visitedAux=visited;
-	ll mini=INF; ll letra1, letra2;
-	costo=0;
-	vector<ll> colores2={0,1};
-	dfs(colores2,0,raiz);
-	if (costo<mini){
-		letra1=0, letra2=1, mini=costo;
-	}
-	costo=0;
-	colores=coloresAux;
-	visited=visitedAux;
-	colores2={1,0};
-	dfs(colores2,0,raiz);
-	if (costo<mini){
-		letra1=1, letra2=0, mini=costo;
-		
-	}
-	costo=0;
-	colores=coloresAux;
-	visited=visitedAux;
-	colores2={0,2};
-	dfs(colores2,0,raiz);
-	if (costo<mini){
-		letra1=0, letra2=2, mini=costo;
-	}
-	costo=0;
-	colores=coloresAux;
-	visited=visitedAux;
-	colores2={2,0};
-	dfs(colores2,0,raiz);
-	if (costo<mini){
-		letra1=2, letra2=0, mini=costo;
-	}
-	costo=0;
-	colores=coloresAux;
-	visited=visitedAux;
-	colores2={1,2};
-	dfs(colores2,0,raiz);
-	if (costo<mini){
-		letra1=1, letra2=2, mini=costo;
-	}
-	costo=0;
-	colores=coloresAux;
-	visited=visitedAux;
-	colores2={2,1};
-	dfs(colores2,0,raiz);
-	if (costo<mini){
-		letra1=2, letra2=1, mini=costo;
-	}
-	costo=0;
-	colores=coloresAux;
-	char l1=letra1+'A', l2=letra2+'A';
-	cout<<mini<<" "<<l1<<" "<<l2<<"\n";
+	char c1=resp[0]+'A', c2=resp[1]+'A';
+	cout<<minCosto<<" "<<c1<<" "<<c2<<endl;
 }
